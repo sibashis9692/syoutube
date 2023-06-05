@@ -1,0 +1,135 @@
+/* Main Layout Styles */
+* {
+    box-sizing: border-box;
+  }
+  
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: "Fira Sans", sans-serif;
+    color: #f5f6fa;
+  }
+  
+  .background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(#0C0E10, #446182);
+  }
+  
+  .background .ground {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 25vh;
+    background: #0C0E10;
+  }
+  
+  .container {
+    position: relative;
+    margin: 0 auto;
+    width: 85%;
+    height: 100vh;
+    padding-bottom: 25vh;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+  }
+  
+  .left-section,
+  .right-section {
+    position: relative;
+  }
+  
+  /* Left Section Styles */
+  .left-section {
+    width: 40%;
+  }
+  
+  .left-section .inner-content {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .left-section .heading {
+    text-align: center;
+    font-size: 9em;
+    line-height: 1.3em;
+    margin: 2rem 0 0.5rem 0;
+    padding: 0;
+    text-shadow: 0 0 1rem #fefefe;
+  }
+  
+  .left-section .subheading {
+    text-align: center;
+    max-width: 480px;
+    font-size: 1.5em;
+    line-height: 1.15em;
+    padding: 0 1rem;
+    margin: 0 auto;
+  }
+  
+  /* Right Section Styles */
+  .right-section {
+    width: 50%;
+  }
+  
+  .right-section .svgimg {
+    position: absolute;
+    bottom: 0;
+    padding-top: 10vh;
+    padding-left: 1vh;
+    max-width: 100%;
+    max-height: 100%;
+  }
+  
+  .right-section .svgimg .bench-legs {
+    fill: #0C0E10;
+  }
+  
+  .right-section .svgimg .top-bench,
+  .right-section .svgimg .bottom-bench {
+    stroke: #0C0E10;
+    stroke-width: 1px;
+    fill: #5B3E2B;
+  }
+  
+  .right-section .svgimg .bottom-bench path:nth-child(1) {
+    fill: darken(#5B3E2B, 7%);
+  }
+  
+  .right-section .svgimg .lamp-details {
+    fill: #202425;
+  }
+  
+  .right-section .svgimg .lamp-accent {
+    fill: lighten(#202425, 5%);
+  }
+  
+  .right-section .svgimg .lamp-bottom {
+    fill: linear-gradient(#202425, #0C0E10);
+  }
+  
+  .right-section .svgimg .lamp-light {
+    fill: #EFEFEF;
+  }
+  
+  @keyframes glow {
+    0% {
+      text-shadow: 0 0 1rem #fefefe;
+    }
+    50% {
+      text-shadow: 0 0 1.85rem #ededed;
+    }
+    100% {
+      text-shadow: 0 0 1rem #fefefe;
+    }
+  }
+  

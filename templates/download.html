@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{{url_for('static',filename="/styles/style.css")}}">
+</head>
+<body>
+    <div class="container_d">
+        <div class="box_do">
+            <div class="content">
+                <div class="item">
+                    <div class="right">
+                        <img id="images" src="{{url.thumbnail_url}}" alt="">
+                    </div>
+                    <div class="left">
+                        <div id="tittle">
+                            {{url.title}}
+                        </div>
+                        <div id="owner">
+                            {{url.author}}
+                        </div>
+                        <div class="option">
+                            <select name="select" id="selection" onchange="printSelectedOption()">
+                                <optgroup label="mp4">
+                                    <option data-format="mp4" >mp4</option>
+                                    {%for item in list1 %}
+                                        <option data-format="mp4" >{{item}} ({{resolutions.get(item)}})</option>
+                                    {% endfor %}
+                                </optgroup>
+                                <optgroup label="mp3">
+                                    <option data-format="mp3" value="bestaudio">audio ({{audioSize}})</option>
+                                </optgroup>
+                            </select>
+                            <form method="POST" id="method">
+                                <button type="submit" id="buttom">Download</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function printSelectedOption() {
+            const form = document.getElementById('method'); 
+            const selection = document.querySelector('#selection');
+            const selectedOption = selection.options[selection.selectedIndex];
+            let res=selectedOption.textContent;
+            const myArray = res.split(" ")
+            res= myArray[0]
+            console.log(res)
+            form.action = "/download/" + res;
+        }
+        </script>
+</body>
+
+</html>

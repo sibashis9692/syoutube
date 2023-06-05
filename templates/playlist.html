@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<link rel="manifest" href="{{url_for('static',filename='manifest.json')}}">
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap');
+		*{
+			padding: 0px;
+			margin: 0px;
+		}
+		.container{
+			height: 100vh;
+			width: 100vw;
+			background-color:#08003a!important;
+		}
+		nav{
+			height: 100px;
+			width: 100%;
+			background-color: black;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+		}
+		.owner{
+			color: white;
+			font-size: 25px;
+			font-family: 'DM Serif Display', serif;
+			margin: 0px 0px 0px 110px;
+		}
+		.playlist{
+			color: white;
+			font-size: 23px;
+			font-family: 'DM Serif Display', serif;
+			margin: 0px 100px 0px 0px;
+			text-decoration: none;
+		}
+		#atag{
+			text-decoration: none;
+			color: rgb(255, 255, 255);
+		}
+		.content{
+			display: flex;
+			justify-content: center;
+			height: 34%;
+			width: 100%;
+		}
+		.content1{
+			display: flex;
+			justify-content: center;
+			height: 63.3333px;
+			width: 100%;
+		}
+		.title{
+			color: white;
+    		font-size: 50px;
+			height: 60px;
+			margin: 100px 0px 0px 0px;
+		}
+		.inp{
+			display: inline-block;
+			height: 63.3333px;
+			width: 340px;
+		}
+		#input{
+			height: 59.3333px;
+			width: 340px;
+			display: inline-block;
+			border: 1px solid white;
+			font-family: 'DM Serif Display', serif;	
+			font-size: 17px;
+		}
+		#input:focus {
+  			outline: 1px solid rgb(255, 255, 255);
+		}
+		.box{
+			display: inline-block;
+			height: 60.3333px;
+			width: 161px;
+			background-color: rgb(255, 255, 255);
+		}
+		.box1{
+			height: 60.3333px;
+			width: 155px;
+			display: flex;
+			align-items: center;	
+			justify-content: center;
+		}
+		#download{
+			height: 47px;
+			width: 149px;
+			background-color: #dc3545;
+			font-family: 'DM Serif Display', serif;
+			font-size: 20px;
+			color: white;
+			border: 1px solid #dc3545;
+			border-radius: 5px;
+			cursor: pointer;
+		}
+
+		@media screen and (max-width: 700px){
+			.container{
+				height: 100vh;
+				width: 100vw;
+				background-color:#08003a!important;;
+			}
+			.title{
+				color: rgb(255, 255, 255);
+    			font-size: 22px;
+				height: 60px;
+				margin: 100px 0px 0px 0px;
+				font-weight: bold;
+			}
+			.inp{
+				display: inline-block;
+				height: 63.3333px;
+				width: 240px;
+			}
+			#input{
+				height: 59.3333px;
+				width: 240px;
+				display: inline-block;
+				border: 1px solid white;
+				font-family: 'DM Serif Display', serif;	
+				font-size: 14px;
+			}
+			.box{
+				display: inline-block;
+				height: 61.3333px;
+				width: 111px;
+				background-color: rgb(255, 255, 255);
+			}
+			.box1{
+				height: 60.3333px;
+				width: 111px;
+				display: flex;
+				align-items: center;	
+				justify-content: center;
+			}
+			#download{
+				height: 47px;
+				width: 100px;
+				background-color: #dc3545;
+				font-family: 'DM Serif Display', serif;
+				font-size: 15px;
+				color: white;
+				border: 1px solid #dc3545;
+				border-radius: 5px;
+				cursor: pointer;
+			}	
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<nav>
+			<div class="logo">
+				<div class="owner">
+					sYoutube
+				</div>
+			</div>
+
+			<div class="playlist">
+				<div class="playlist">
+					<a id="atag" href="/">Video Download</a>
+				</div>
+			</div>
+		</nav>
+		<div class="content">
+			<div class="title">	
+				<div class="tittle">
+					Youtube Playlist Downloder
+				</div>
+			</div>
+		</div>
+		<form method="post" action="/playlistDownload">
+			<div class="content1">
+				<div class="inp">
+					<input type="text" id="input" name="inputbox" placeholder="Paste your Playlist link here" value="https://youtube.com/playlist?list=PLDYtC50LJ5HRuI8tWUbXErotTpb414HPj">
+				</div>
+				<div class="box">
+					<div class="box1">
+						<button id="download" type="submit">Download➜</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</body>
+</html>
