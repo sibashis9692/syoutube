@@ -13,20 +13,22 @@
             <div class="box_p_d">
                 <div class="top">
                     <h3>Download Full Playlist Here</h3>
-                    <select name="select" id="selectionN" onchange="selectedOption()">
-                        <optgroup label="mp4">
-                            <option data-format="mp4" >mp4</option>
-                            {%for item in list %}
-                                <option data-format="mp4" >{{item}} ({{dict[item][1]}})</option>
-                            {% endfor %}
-                        </optgroup>
-                        <optgroup label="mp3">
-                            <option data-format="mp3" value="bestaudio">audio ({{ totalaudiosize }})</option>
-                        </optgroup>
-                    </select>
-                    <form method="POST" id="method">
-                        <button type="submit" id="buttom">Download</button>
-                    </form>
+                    <div class="box">
+                        <select name="select" id="selectionN" onchange="selectedOption()">
+                            <optgroup label="mp4">
+                                <option data-format="mp4" >mp4</option>
+                                {%for item in list %}
+                                    <option data-format="mp4" >{{item}} ({{dict[item][1]}})</option>
+                                {% endfor %}
+                            </optgroup>
+                            <optgroup label="mp3">
+                                <option data-format="mp3" value="bestaudio">audio ({{ totalaudiosize }})</option>
+                            </optgroup>
+                        </select>
+                        <form method="POST" id="method">
+                            <button type="submit" id="buttom">Download</button>
+                        </form>
+                    </div>
                 </div>
     
                 {% for obj in object %}
