@@ -1,16 +1,15 @@
 {
     "name": "S YouTube Downloder",
     "short_name" : "SYouTube",
-    "start_url": "syoutube.onrender.com",
-    "scope" : "./",
+    "start_url": "/",
     "icons": [
         {
-            "src": "/images/icon.png",
+            "src": "/images/logo.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "/static/icon.png",
+            "src": "/images/logo.png",
             "sizes": "512x512",
             "type": "image/png"
         }
