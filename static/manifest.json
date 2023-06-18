@@ -1,7 +1,7 @@
 {
     "name": "S YouTube Downloder",
     "short_name" : "SYouTube",
-    "start_url": "index.html?utm_source=homescreen",
+    "start_url": "syoutube.onrender.com",
     "scope" : "./",
     "icons": [
         {
