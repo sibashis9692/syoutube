@@ -47,18 +47,27 @@ def home():
     except:
         return render_template("error.html")
 
-@app.route('/download/<string:id>', methods=['POST', 'GET'])
-def download(id):
+@app.route('/download/<string:id>/<string:audio>', methods=['POST', 'GET'])
+def download(id, audio):
     try:
         if request.method == 'POST':
             ydl_opts={
                 'format': id,
+                'outtmpl': '%(title)s.%(ext)s'
             }
             ydl = youtube_dl.YoutubeDL(ydl_opts)
-            ydl.download([session['link']])
-            flash('Download successful!', 'success')
+
+            # Download the video and get the information about the downloaded file
+            info_dict = ydl.extract_info(session['link'], download=True)
+            filename = ydl.prepare_filename(info_dict)
+            Fileformat="mp4"
+            if(audio == "true"):
+                Fileformat="mp3"
+            Filename=f"{filename.title().split('.')[0]}.{Fileformat}"
+            # Now, use send_file to send the downloaded video to the client
+            return send_file(filename, as_attachment=True, download_name=Filename)
         return redirect("/")
-    except:  
+    except:
         return render_template("error.html")
 @app.route('/playlist')
 def playlist():
@@ -140,8 +149,8 @@ def playlistDownload():
         return render_template("playlist.html")
     except:
         return render_template("error.html")
-@app.route('/downloadPlaylist/<string:res>/<string:format_id>', methods=['POST','GET'])
-def downloadPlaylist(res, format_id):
+@app.route('/downloadPlaylist/<string:res>/<string:format_id>/<string:audio>', methods=['POST','GET'])
+def downloadPlaylist(res, format_id, audio):
     try:
         if(request.method == 'POST'):
             ydl_opts={}
@@ -158,10 +167,15 @@ def downloadPlaylist(res, format_id):
                         id = audioSize[index][0]
                         ydl_opts={
                             'format': id,
+                            'outtmpl': '%(title)s.%(ext)s'
                         }
                         song=youtube_dl.YoutubeDL(ydl_opts)
-                        song.download(video['id'])
-                    return redirect("/")
+                        info_dict = ydl.extract_info(video['id'], download=True)
+                        filename = ydl.prepare_filename(info_dict)
+                        Fileformat="mp3"
+                        Filename=f"{filename.title().split('.')[0]}.{Fileformat}"
+                        # Now, use send_file to send the downloaded video to the client
+                    return send_file(filename, as_attachment=True, download_name=Filename)
                 # This else condition is for download the video of playlist
                 else:
                     for index, video in enumerate(videos):
@@ -169,18 +183,30 @@ def downloadPlaylist(res, format_id):
                         id=dictonary.get(index).get(desired_resolution)[0]
                         ydl_opts={
                             'format': id,
+                            'outtmpl': '%(title)s.%(ext)s'
                         }
                         ydl=youtube_dl.YoutubeDL(ydl_opts)
-                        ydl.download(video['id'])
-                    return(redirect("/"))
+                        info_dict = ydl.extract_info(video['id'], download=True)
+                        filename = ydl.prepare_filename(info_dict)
+                        Fileformat="mp4"
+                        Filename=f"{filename.title().split('.')[0]}.{Fileformat}"
+                        # Now, use send_file to send the downloaded video to the client
+                    return send_file(filename, as_attachment=True, download_name=Filename)
             else:
                 ydl_opts={
                     'format': format_id,
+                    'outtmpl': '%(title)s.%(ext)s'
                 }
                 song=youtube_dl.YoutubeDL(ydl_opts)
                 obj=videos[int(desired_resolution.split("p")[-1])]
-                song.download(obj['id'])
-            flash('Download successful!', 'success')
+                info_dict = song.extract_info(obj['id'], download=True)
+                filename = song.prepare_filename(info_dict)
+                Fileformat="mp4"
+                if(audio == "true"):
+                    Fileformat="mp3"
+                Filename=f"{filename.title().split('.')[0]}.{Fileformat}"
+                # Now, use send_file to send the downloaded video to the client
+                return send_file(filename, as_attachment=True, download_name=Filename)
         return redirect("/playlistDownload")
     except:
         return render_template("error.html")

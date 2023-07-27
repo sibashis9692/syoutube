@@ -49,8 +49,14 @@
             const form = document.getElementById('method'); 
             const selection = document.querySelector('#selection');
             const selectedOption = selection.options[selection.selectedIndex];
+            const text=selectedOption.textContent
             const hiddenInfo = selectedOption.dataset.hiddenInfo;
-            form.action = "/download/" + hiddenInfo;
+            let audio = false
+
+            if(text.split(" ")[0] == "audio"){
+                audio = true
+            }
+            form.action = "/download/" + hiddenInfo + "/" + audio;
         }
         </script>
 </body>

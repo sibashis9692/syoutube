@@ -81,7 +81,7 @@
             if(res == "audio"){
                 res="audiop"
             }
-            form.action = "/downloadPlaylist/" + res;
+            form.action = "/downloadPlaylist/" + res + "/0/audio";
         }
 
         function printSelectedOption(index) {
@@ -89,8 +89,13 @@
             const selection = document.querySelector('#selection__' + index);
             const selectedOption = selection.options[selection.selectedIndex];
             let id=selectedOption.dataset.hiddenInfo;
+            let text=selectedOption.textContent;
+            let audio = false
 
-            form.action = "/downloadPlaylist/p" + (index - 1) + "/" + id;
+            if(text.split(" ")[0] == "audio"){
+                audio = true
+            }
+            form.action = "/downloadPlaylist/p" + (index - 1) + "/" + id + "/" + audio;
         }
         
         </script>
