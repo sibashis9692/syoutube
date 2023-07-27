@@ -44,10 +44,8 @@ def home():
             list1 = helper(resolutions)
             return render_template("download.html", url=url, list1=list1, resolutions=resolutions, audioSize = audioSize)
         return render_template("index.html")
-    # except:
-    #     return render_template("error.html")
-    except Exception as e:
-        return f"{e}"
+    except:
+        return render_template("error.html")
 
 @app.route('/download/<string:id>', methods=['POST', 'GET'])
 def download(id):
@@ -60,10 +58,8 @@ def download(id):
             ydl.download([session['link']])
             flash('Download successful!', 'success')
         return redirect("/")
-    # except:  
-    #     return render_template("error.html")
-    except Exception as e:
-        return f"{e}"
+    except:  
+        return render_template("error.html")
 @app.route('/playlist')
 def playlist():
     return render_template("playlist.html")
