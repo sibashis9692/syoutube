@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="{{url_for('static',filename="/styles/style.css")}}">
+    <title>syoutube</title>
+	<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/logo.png') }}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename="/styles/download.css")}}">
 </head>
 <body>
     <div class="container_d">
@@ -13,29 +14,29 @@
             <div class="content">
                 <div class="item">
                     <div class="right">
-                        <img id="images" src="{{url.thumbnail_url}}" alt="">
+                        <img id="images" src="{{url.thumbnail}}" alt="">
                     </div>
                     <div class="left">
                         <div id="tittle">
                             {{url.title}}
                         </div>
                         <div id="owner">
-                            {{url.author}}
+                            {{url.uploader}}
                         </div>
                         <div class="option">
-                            <select name="select" id="selection" onchange="printSelectedOption()">
+                            <select name="select" id="selection">
                                 <optgroup label="mp4">
-                                    <option data-format="mp4" >mp4</option>
+                                    <option data-format="mp4" disabled>mp4</option>
                                     {%for item in list1 %}
-                                        <option data-format="mp4" >{{item}} ({{resolutions.get(item)}})</option>
+                                        <option data-format="mp4" data-hidden-info="{{resolutions.get(item)[0]}}">{{item}} ({{resolutions.get(item)[1]}})</option>
                                     {% endfor %}
                                 </optgroup>
                                 <optgroup label="mp3">
-                                    <option data-format="mp3" value="bestaudio">audio ({{audioSize}})</option>
+                                    <option data-format="mp3" value="bestaudio" data-hidden-info="{{audioSize[0]}}">audio ({{audioSize[1]}})</option>
                                 </optgroup>
                             </select>
                             <form method="POST" id="method">
-                                <button type="submit" id="buttom">Download</button>
+                                <button type="submit" id="buttom" onclick="printSelectedOption()">Download</button>
                             </form>
                         </div>
                     </div>
@@ -48,11 +49,8 @@
             const form = document.getElementById('method'); 
             const selection = document.querySelector('#selection');
             const selectedOption = selection.options[selection.selectedIndex];
-            let res=selectedOption.textContent;
-            const myArray = res.split(" ")
-            res= myArray[0]
-            console.log(res)
-            form.action = "/download/" + res;
+            const hiddenInfo = selectedOption.dataset.hiddenInfo;
+            form.action = "/download/" + hiddenInfo;
         }
         </script>
 </body>

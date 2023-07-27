@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="{{url_for('static',filename="/styles/style.css")}}">
+    <title>syoutube</title>
+	<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/logo.png') }}"> 
+    <link rel="stylesheet" href="{{url_for('static',filename="/styles/download.css")}}">
 </head>
 <body>
     <div class="container_d">
@@ -14,9 +15,9 @@
                 <div class="top">
                     <h3>Download Full Playlist Here</h3>
                     <div class="box">
-                        <select name="select" id="selectionN" onchange="selectedOption()">
+                        <select name="select" id="selectionN">
                             <optgroup label="mp4">
-                                <option data-format="mp4" >mp4</option>
+                                <option data-format="mp4" disabled>mp4</option>
                                 {%for item in list %}
                                     <option data-format="mp4" >{{item}} ({{dict[item][1]}})</option>
                                 {% endfor %}
@@ -25,7 +26,7 @@
                                 <option data-format="mp3" value="bestaudio">audio ({{ totalaudiosize }})</option>
                             </optgroup>
                         </select>
-                        <form method="POST" id="method">
+                        <form method="POST" id="method" onclick = selectedOption()>
                             <button type="submit" id="buttom">Download</button>
                         </form>
                     </div>
@@ -35,30 +36,30 @@
                     <div class="content">
                         <div class="item">
                             <div class="right">
-                                <img id="images" src="{{obj.thumbnail_url}}" alt="">
+                                <img id="images" src="{{obj.thumbnail}}" alt="">
                             </div>
                             <div class="left">
                                 <div id="tittle">
                                     {{ obj.title }}
                                 </div>
                                 <div id="owner">
-                                    {{ obj.author}}
+                                    {{ obj.uploader}}
                                 </div>
                                 <div class="option">
-                                    <select name="select" id="selection__{{ loop.index }}" onchange="printSelectedOption({{loop.index}})">
+                                    <select name="select" id="selection__{{ loop.index }}">
                                         <optgroup label="mp4">
-                                            <option data-format="mp4" >mp4</option>
+                                            <option data-format="mp4" disabled>mp4</option>
                                             {% set ind = loop.index %}
                                             {%for item in res[(loop.index)-1] %}
-                                                <option data-format="mp4" >{{item}} ({{dictonary.get(ind - 1).get(item)}})</option>
+                                                <option data-format="mp4" data-hidden-info="{{dictonary.get(ind - 1).get(item)[0]}}">{{item}} ({{dictonary.get(ind - 1).get(item)[1]}})</option>
                                             {% endfor %}
                                         </optgroup>
                                         <optgroup label="mp3">
-                                            <option data-format="mp3" value="bestaudio">audio ({{ audioSize[ind - 1] }})</option>
+                                            <option data-format="mp3" data-hidden-info="{{audioSize[ind - 1][0]}}">audio ({{ audioSize[ind - 1][1] }})</option>
                                         </optgroup>
                                     </select>
                                     <form method="POST" id="method__{{ loop.index }}">
-                                        <button type="submit" id="buttom">Download</button>
+                                        <button type="submit" id="buttom" onclick="printSelectedOption({{loop.index}})">Download</button>
                                     </form>
                                 </div>
                             </div>
@@ -80,7 +81,6 @@
             if(res == "audio"){
                 res="audiop"
             }
-            console.log(res)
             form.action = "/downloadPlaylist/" + res;
         }
 
@@ -88,12 +88,11 @@
             const form = document.getElementById('method__' + index); 
             const selection = document.querySelector('#selection__' + index);
             const selectedOption = selection.options[selection.selectedIndex];
-            let res=selectedOption.textContent;
-            const myArray = res.split(" ")
-            res= myArray[0]
-            console.log(res + (index - 1))
-            form.action = "/downloadPlaylist/" + res + (index - 1);
+            let id=selectedOption.dataset.hiddenInfo;
+
+            form.action = "/downloadPlaylist/p" + (index - 1) + "/" + id;
         }
+        
         </script>
 </body>
 
