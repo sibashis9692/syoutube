@@ -12,7 +12,7 @@ def sw():
 
 @app.route('/', methods=['POST', 'GET'])
 def home():
-    # try:
+    try:
         if request.method == 'POST':
             ydl_opts={}
             session['link'] = request.form.get('inputbox')
@@ -43,13 +43,11 @@ def home():
             list1 = helper(resolutions)
             return render_template("download.html", url=url, list1=list1, resolutions=resolutions, audioSize = audioSize)
         return render_template("index.html")
-    # except:
-    #     return render_template("error.html")
-    # except Exception as e:
-    #     return f"{e}"
+    except:
+        return render_template("error.html")
 @app.route('/download/<string:id>/<string:audio>', methods=['POST', 'GET'])
 def download(id, audio):
-    # try:
+    try:
         if request.method == 'POST':
             ydl_opts={
                 'format': id,
@@ -67,17 +65,15 @@ def download(id, audio):
             # Now, use send_file to send the downloaded video to the client
             return send_file(filename, as_attachment=True, download_name=Filename)
         return redirect("/")
-    # except:
-    #     return render_template("error.html")
-    # except Exception as e:
-    #     return f"{e}"
+    except:
+        return render_template("error.html")
 @app.route('/playlist')
 def playlist():
     return render_template("playlist.html")
 
 @app.route('/playlistDownload', methods=['POST','GET'])
 def playlistDownload():
-    # try:
+    try:
         global dictonary, audioSize
         ydl_opts={}
         if(request.method == 'POST'):
@@ -149,13 +145,11 @@ def playlistDownload():
                         dict[j][1]=calculate_total_size(dict[j][1] , dictonary.get(i).get(j)[1])
             return render_template("playlistDownload.html", object=object, list=list, res=res, dictonary=dictonary,audioSize=audioSize, dict=dict,totalaudiosize=totalaudiosize)
         return render_template("playlist.html")
-    # except:
-    #     return render_template("error.html")
-    # except Exception as e:
-    #     return f"{e}"
+    except:
+        return render_template("error.html")
 @app.route('/downloadPlaylist/<string:res>/<string:format_id>/<string:audio>', methods=['POST','GET'])
 def downloadPlaylist(res, format_id, audio):
-    # try:
+    try:
         if(request.method == 'POST'):
             ydl_opts={}
             ydl=youtube_dl.YoutubeDL(ydl_opts)
@@ -213,10 +207,8 @@ def downloadPlaylist(res, format_id, audio):
                 # Now, use send_file to send the downloaded video to the client
                 return send_file(filename, as_attachment=True, download_name=Filename)
         return redirect("/playlistDownload")
-    # except:
-    #     return render_template("error.html")
-    # except Exception as e:
-    #     return f"{e}"
+    except:
+        return render_template("error.html")
 def helper(input_set):
     list1 = [resolution for resolution in input_set]  # Use list comprehension and sort in one step
     return list1
