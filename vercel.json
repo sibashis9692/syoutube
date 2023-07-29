@@ -1,14 +1,11 @@
 {
-    "builds": [
-        {
-            "src": "./main.py",
-            "use": "@vercel/python"
-        }
-    ],
+    "name": "syoutube",
+    "version": 2,
+    "builds": [{
+        "src": "*py",
+        "use": "@liudonghua123/now-flask"
+    }],
     "routes": [
-        {
-            "src": "/(.*)",
-            "dest": "./main.py"
-        }
+        { "src": "(.*)", "dest": "app.py" }
     ]
 }
