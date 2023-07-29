@@ -30,23 +30,23 @@ def home():
             for stream in video_streams:
                 resolution = stream.get('format_note')
                 size= convert_size(stream.get("filesize"))
-                if(resolution not in ["storyboard", "ultralow", "low", "medium"] and not resolution.__contains__("THROTTLED") and size != "0 MB"):
-
+                if(resolution.split("p")[0].isdigit() and size != "0 MB"):
                     # print(f"{resolution}  {convert_size(stream.get('filesize'))} {stream['format_id']}")
                     if(resolutions.get(resolution) == None):
                         resolutions[resolution] = [stream['format_id'], convert_size(stream.get('filesize'))]
                     else:
-                        before = int(''.join(filter(str.isdigit, resolutions[resolution])))
-                        after=int(''.join(filter(str.isdigit, convert_size(stream.get('filesize')))))
+                        before = float(resolutions[resolution][1].split(' ')[0])
+                        after=float(convert_size(stream.get('filesize')).split(' ')[0])
                         if(before < after):
                             resolutions[resolution]=[stream['format_id'], convert_size(stream.get('filesize'))]
             # This is for Shorting the List basic of resulations
             list1 = helper(resolutions)
             return render_template("download.html", url=url, list1=list1, resolutions=resolutions, audioSize = audioSize)
         return render_template("index.html")
-    except:
-        return render_template("error.html")
-
+    # except:
+    #     return render_template("error.html")
+    except Exception as e:
+        return f"{e}"
 @app.route('/download/<string:id>/<string:audio>', methods=['POST', 'GET'])
 def download(id, audio):
     try:
@@ -67,15 +67,17 @@ def download(id, audio):
             # Now, use send_file to send the downloaded video to the client
             return send_file(filename, as_attachment=True, download_name=Filename)
         return redirect("/")
-    except:
-        return render_template("error.html")
+    # except:
+    #     return render_template("error.html")
+    except Exception as e:
+        return f"{e}"
 @app.route('/playlist')
 def playlist():
     return render_template("playlist.html")
 
 @app.route('/playlistDownload', methods=['POST','GET'])
 def playlistDownload():
-    try:
+    # try:
         global dictonary, audioSize
         ydl_opts={}
         if(request.method == 'POST'):
@@ -121,14 +123,14 @@ def playlistDownload():
                 for stream in video_streams:
                     resolution = stream.get('format_note')
                     size = convert_size(stream.get("filesize"))
-                    if(resolution not in ["storyboard", "ultralow", "low", "medium"] and not resolution.__contains__("THROTTLED") and size != "0 MB"):
+                    if(resolution.split("p")[0].isdigit() and size != "0 MB"):
 
                         # print(f"{resolution}  {convert_size(stream.get('filesize'))}  {stream.get('format_id')}")
                         if(resolutions.get(resolution) == None):
                             resolutions[resolution] = [stream.get('format_id'), convert_size(stream.get('filesize'))]
                         else:
-                            before = int(''.join(filter(str.isdigit, resolutions[resolution])))
-                            after=int(''.join(filter(str.isdigit, convert_size(stream.get('filesize')))))
+                            before = float(resolutions[resolution][1].split(' ')[0])
+                            after=float(convert_size(stream.get('filesize')).split(' ')[0])
                             if(before < after):
                                 resolutions[resolution] = [stream.get('format_id'), convert_size(stream.get('filesize'))]
                 dictonary[index]=resolutions
@@ -138,17 +140,19 @@ def playlistDownload():
                     if(dict.__contains__(item)):
                         dict[item][0]=dict.get(item)[0] + 1
                 res.append(helper(resolutions))
-
             for keys in dict:
                 if(dict.get(keys)[0] == length):
                     list.append(keys)
             for i in dictonary:
                 for j in dictonary.get(i):
-                    dict[j][1]=calculate_total_size(dict[j][1] , dictonary.get(i).get(j)[1])
+                    if(dict.get(j) != None):
+                        dict[j][1]=calculate_total_size(dict[j][1] , dictonary.get(i).get(j)[1])
             return render_template("playlistDownload.html", object=object, list=list, res=res, dictonary=dictonary,audioSize=audioSize, dict=dict,totalaudiosize=totalaudiosize)
         return render_template("playlist.html")
-    except:
-        return render_template("error.html")
+    # except:
+    #     return render_template("error.html")
+    # except Exception as e:
+    #     return f"{e}"
 @app.route('/downloadPlaylist/<string:res>/<string:format_id>/<string:audio>', methods=['POST','GET'])
 def downloadPlaylist(res, format_id, audio):
     try:
@@ -208,8 +212,10 @@ def downloadPlaylist(res, format_id, audio):
                 # Now, use send_file to send the downloaded video to the client
                 return send_file(filename, as_attachment=True, download_name=Filename)
         return redirect("/playlistDownload")
-    except:
-        return render_template("error.html")
+    # except:
+    #     return render_template("error.html")
+    except Exception as e:
+        return f"{e}"
 def helper(input_set):
     list1 = [resolution for resolution in input_set]  # Use list comprehension and sort in one step
     return list1
