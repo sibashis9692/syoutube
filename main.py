@@ -30,8 +30,8 @@ def home():
             for stream in video_streams:
                 resolution = stream.get('format_note')
                 size= convert_size(stream.get("filesize"))
+                # print(f"{resolution}  {convert_size(stream.get('filesize'))} {stream['format_id']}")
                 if(resolution.split("p")[0].isdigit() and size != "0 MB"):
-                    # print(f"{resolution}  {convert_size(stream.get('filesize'))} {stream['format_id']}")
                     if(resolutions.get(resolution) == None):
                         resolutions[resolution] = [stream['format_id'], convert_size(stream.get('filesize'))]
                     else:
@@ -161,7 +161,7 @@ def downloadPlaylist(res, format_id, audio):
             if(desired_resolution.split("p")[-1] == ""):
                 # This if condition is for download the audio of playlist
                 if(desired_resolution == "audiop"):
-                    print(audioSize)
+                    # print(audioSize)
                     for index,video in enumerate(videos):
                         id = audioSize[index][0]
                         ydl_opts={
