@@ -1,4 +1,4 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -61,59 +61,4 @@
         </script>
 </body>
 
-</html> -->
-
-
-
-
-
-
-
-
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Download Video</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    h1 { color: #333; }
-    .resolution-list { margin: 20px 0; }
-    button { margin: 5px; padding: 10px 15px; cursor: pointer; }
-    .audio-btn { background-color: #4CAF50; color: white; border: none; }
-    .video-btn { background-color: #2196F3; color: white; border: none; }
-  </style>
-</head>
-<body>
-  <h1>{{ url.title }}</h1>
-  <p>Choose your download format:</p>
-
-  <div class="resolution-list">
-    <h3>Video:</h3>
-    {% for res in list1 %}
-      <button class="video-btn" onclick="downloadVideo('{{ resolutions[res][0] }}', false)">
-        {{ res }} - {{ resolutions[res][1] }}
-      </button>
-    {% endfor %}
-  </div>
-
-  <div class="resolution-list">
-    <h3>Audio:</h3>
-    <button class="audio-btn" onclick="downloadVideo('{{ audioSize[0] }}', true)">
-      Best Audio - {{ audioSize[1] }}
-    </button>
-  </div>
-
-  <script>
-    function downloadVideo(format_id, isAudio) {
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = `/download/${format_id}/${isAudio}`;
-      document.body.appendChild(form);
-      form.submit();
-    }
-  </script>
-</body>
 </html>
