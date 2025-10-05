@@ -547,12 +547,17 @@
 
 
 
-from flask import Flask, redirect, request, render_template, session, send_file, flash
-import yt_dlp
+from flask import Flask, request, render_template, session, send_file, redirect
+from pytube import YouTube, Playlist
 import os
+import subprocess
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "654c0fb3968af9d5e6a9b3edcbc7051b"
+
+DOWNLOAD_FOLDER = "downloads"
+if not os.path.exists(DOWNLOAD_FOLDER):
+    os.makedirs(DOWNLOAD_FOLDER)
 
 dictonary = {}
 audioSize = []
@@ -566,134 +571,177 @@ def convert_size(size_in_bytes):
         return "0 MB"
     size_units = ["bytes", "KB", "MB", "GB", "TB"]
     size = size_in_bytes
-    index = 0
-    while size >= 1024 and index < len(size_units) - 1:
+    unit_index = 0
+    while size >= 1024 and unit_index < len(size_units) - 1:
         size /= 1024
-        index += 1
-    return f"{size:.2f} {size_units[index]}"
+        unit_index += 1
+    return f"{size:.2f} {size_units[unit_index]}"
+
+def helper(input_set):
+    return [resolution for resolution in input_set]
 
 def calculate_total_size(size1, size2):
-    def size_to_mb(size):
-        if "MB" in size:
-            return float(size.replace("MB", "").strip())
-        if "GB" in size:
-            return float(size.replace("GB", "").strip()) * 1024
-        return 0
-    total_mb = size_to_mb(size1) + size_to_mb(size2)
-    if total_mb > 1023:
-        return f"{total_mb/1024:.2f} GB"
-    return f"{total_mb:.2f} MB"
+    total_size_mb = 0
+    for size in [size1, size2]:
+        if 'MB' in size:
+            total_size_mb += float(size.replace('MB', '').strip())
+        elif 'GB' in size:
+            total_size_mb += float(size.replace('GB', '').strip()) * 1024
+    if total_size_mb > 1023:
+        return f"{total_size_mb / 1024:.2f} GB"
+    return f"{total_size_mb:.2f} MB"
 
-def helper(resolutions_dict):
-    return sorted(resolutions_dict.keys(), key=lambda x: int(x.replace("p","")) if x.replace("p","").isdigit() else 0)
-
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/', methods=['GET', 'POST'])
 def home():
-    if request.method == 'POST':
-        try:
+    try:
+        if request.method == 'POST':
             session['link'] = request.form.get('inputbox')
-            ydl_opts = {}
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(session['link'], download=False)
-            video_streams = info.get('formats', [])
-
+            yt = YouTube(session['link'])
+            streams = yt.streams.filter(progressive=True).order_by('resolution').desc()
+            
             # Audio info
-            audio_opts = {'format': 'bestaudio', 'outtmpl': '%(title)s.%(ext)s'}
-            with yt_dlp.YoutubeDL(audio_opts) as ydl_audio:
-                audio_info = ydl_audio.extract_info(session['link'], download=False)
-            audioSize_local = [audio_info['format_id'], convert_size(audio_info.get('filesize'))]
+            audio_stream = yt.streams.filter(only_audio=True).order_by('abr').desc().first()
+            audioSize_ = [audio_stream.itag, convert_size(audio_stream.filesize)]
 
-            # Video resolutions
+            # Resolutions
             resolutions = {}
-            for stream in video_streams:
-                res_label = stream.get('format_note')
-                size = convert_size(stream.get("filesize"))
-                if res_label and res_label.split("p")[0].isdigit() and size != "0 MB":
-                    if res_label not in resolutions or float(size.split()[0]) > float(resolutions[res_label][1].split()[0]):
-                        resolutions[res_label] = [stream['format_id'], size]
+            for stream in streams:
+                res = stream.resolution
+                size = convert_size(stream.filesize)
+                if res and size != "0 MB":
+                    if resolutions.get(res) is None or float(resolutions[res][1].split()[0]) < float(size.split()[0]):
+                        resolutions[res] = [stream.itag, size]
 
             list1 = helper(resolutions)
-            return render_template("download.html", url=info, list1=list1, resolutions=resolutions, audioSize=audioSize_local)
-        except Exception as e:
-            return render_template("error.html", error=str(e))
-    return render_template("index.html")
-
-@app.route('/download/<string:format_id>/<string:is_audio>', methods=['POST'])
-def download(format_id, is_audio):
-    try:
-        ydl_opts = {
-            'format': format_id,
-            'outtmpl': '%(title)s.%(ext)s'
-        }
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(session['link'], download=True)
-            filename = ydl.prepare_filename(info)
-        file_ext = "mp3" if is_audio == "true" else "mp4"
-        download_name = f"{os.path.splitext(filename)[0]}.{file_ext}"
-        return send_file(filename, as_attachment=True, download_name=download_name)
+            return render_template("download.html", url=yt, list1=list1, resolutions=resolutions, audioSize=audioSize_)
+        return render_template("index.html")
     except Exception as e:
-        return render_template("error.html", error=str(e))
+        return render_template("error.html", error=e)
 
-@app.route('/playlist', methods=['GET'])
+@app.route('/download/<int:itag>/<string:audio>', methods=['POST'])
+def download(itag, audio):
+    try:
+        yt = YouTube(session['link'])
+        stream = yt.streams.get_by_itag(itag)
+        filename = stream.default_filename
+        file_path = os.path.join(DOWNLOAD_FOLDER, filename)
+
+        # Video-only streams need audio merge
+        if not stream.includes_audio_track:
+            # Download video
+            video_path = os.path.join(DOWNLOAD_FOLDER, f"video_{filename}")
+            stream.download(output_path=DOWNLOAD_FOLDER, filename=f"video_{filename}")
+
+            # Download best audio
+            audio_stream = yt.streams.filter(only_audio=True).order_by('abr').desc().first()
+            audio_path = os.path.join(DOWNLOAD_FOLDER, f"audio_{filename}.mp3")
+            audio_stream.download(output_path=DOWNLOAD_FOLDER, filename=f"audio_{filename}.mp3")
+
+            # Merge
+            merged_path = os.path.join(DOWNLOAD_FOLDER, f"{yt.title}.mp4")
+            subprocess.run([
+                "ffmpeg", "-y",
+                "-i", video_path,
+                "-i", audio_path,
+                "-c:v", "copy",
+                "-c:a", "aac",
+                merged_path
+            ], check=True)
+
+            os.remove(video_path)
+            os.remove(audio_path)
+            return send_file(merged_path, as_attachment=True, download_name=f"{yt.title}.mp4")
+        else:
+            # Progressive stream (has audio)
+            if audio == "true":
+                filename = filename.replace('.mp4', '.mp3')
+            stream.download(output_path=DOWNLOAD_FOLDER, filename=filename)
+            return send_file(os.path.join(DOWNLOAD_FOLDER, filename), as_attachment=True, download_name=filename)
+    except Exception as e:
+        return render_template("error.html", error=e)
+
+@app.route('/playlist', methods=['GET', 'POST'])
 def playlist():
+    if request.method == 'POST':
+        session['link'] = request.form.get('inputbox')
+        return redirect('/playlistDownload')
     return render_template("playlist.html")
 
-@app.route('/playlistDownload', methods=['POST'])
+@app.route('/playlistDownload', methods=['GET', 'POST'])
 def playlistDownload():
     try:
         global dictonary, audioSize
-        session['link'] = request.form.get("inputbox")
-        ydl_opts = {}
-        audio_opts = {'format': 'bestaudio', 'outtmpl': '%(title)s.%(ext)s'}
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            playlist_info = ydl.extract_info(session['link'], download=False)
-        playlist_length = len(playlist_info['entries'])
+        playlist_url = session.get('link')
+        pl = Playlist(playlist_url)
 
+        object_list = []
         dictonary = {}
         audioSize = []
-        dict_summary = {
-            '144p':[0,'0 MB'], '240p':[0,'0 MB'], '360p':[0,'0 MB'], '480p':[0,'0 MB'],
-            '720p':[0,'0 MB'], '720p60':[0,'0 MB'], '1080p':[0,'0 MB'], '1080p60':[0,'0 MB']
-        }
-        objects = []
-        res_list = []
         totalaudiosize = "0 MB"
 
-        for idx, entry in enumerate(playlist_info['entries']):
-            with yt_dlp.YoutubeDL(audio_opts) as ydl_audio:
-                audio_info = ydl_audio.extract_info(entry['id'], download=False)
-            audioSize.append([audio_info['format_id'], convert_size(audio_info.get('filesize'))])
-            totalaudiosize = calculate_total_size(totalaudiosize, audioSize[idx][1])
+        for index, video_url in enumerate(pl.video_urls):
+            yt = YouTube(video_url)
+            # Audio info
+            audio_stream = yt.streams.filter(only_audio=True).order_by('abr').desc().first()
+            audioSize.append([audio_stream.itag, convert_size(audio_stream.filesize)])
+            totalaudiosize = calculate_total_size(totalaudiosize, audioSize[-1][1])
 
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl_video:
-                info_dict = ydl_video.extract_info(entry['id'], download=False)
-            objects.append(info_dict)
-            streams = info_dict.get('formats', [])
-
+            # Video resolutions
+            streams = yt.streams.filter(progressive=True).order_by('resolution').desc()
             resolutions = {}
-            for s in streams:
-                res_label = s.get('format_note')
-                size = convert_size(s.get("filesize"))
-                if res_label and res_label.split("p")[0].isdigit() and size != "0 MB":
-                    if res_label not in resolutions or float(size.split()[0]) > float(resolutions[res_label][1].split()[0]):
-                        resolutions[res_label] = [s.get('format_id'), size]
-            dictonary[idx] = resolutions
+            for stream in streams:
+                res = stream.resolution
+                size = convert_size(stream.filesize)
+                if res and size != "0 MB":
+                    if resolutions.get(res) is None or float(resolutions[res][1].split()[0]) < float(size.split()[0]):
+                        resolutions[res] = [stream.itag, size]
+            dictonary[index] = resolutions
+            object_list.append(yt)
 
-            for r in helper(resolutions):
-                if r in dict_summary:
-                    dict_summary[r][0] += 1
-            res_list.append(helper(resolutions))
-
-        full_res_list = [k for k,v in dict_summary.items() if v[0] == playlist_length]
-        for i in dictonary:
-            for j in dictonary[i]:
-                if j in dict_summary:
-                    dict_summary[j][1] = calculate_total_size(dict_summary[j][1], dictonary[i][j][1])
-
-        return render_template("playlistDownload.html", object=objects, list=full_res_list, res=res_list,
-                               dictonary=dictonary, audioSize=audioSize, dict=dict_summary, totalaudiosize=totalaudiosize)
+        return render_template("playlistDownload.html", object=object_list, dictonary=dictonary,
+                               audioSize=audioSize, totalaudiosize=totalaudiosize)
     except Exception as e:
-        return render_template("error.html", error=str(e))
+        return render_template("error.html", error=e)
 
-if __name__ == "__main__":
-    app.run(debug=False, host='0.0.0.0')
+@app.route('/downloadPlaylist/<int:index>/<int:itag>/<string:audio>', methods=['POST'])
+def downloadPlaylist(index, itag, audio):
+    try:
+        pl = Playlist(session['link'])
+        video_url = pl.video_urls[index]
+        yt = YouTube(video_url)
+        stream = yt.streams.get_by_itag(itag)
+
+        filename = stream.default_filename
+        file_path = os.path.join(DOWNLOAD_FOLDER, filename)
+
+        if not stream.includes_audio_track:
+            video_path = os.path.join(DOWNLOAD_FOLDER, f"video_{filename}")
+            stream.download(output_path=DOWNLOAD_FOLDER, filename=f"video_{filename}")
+
+            audio_stream = yt.streams.filter(only_audio=True).order_by('abr').desc().first()
+            audio_path = os.path.join(DOWNLOAD_FOLDER, f"audio_{filename}.mp3")
+            audio_stream.download(output_path=DOWNLOAD_FOLDER, filename=f"audio_{filename}.mp3")
+
+            merged_path = os.path.join(DOWNLOAD_FOLDER, f"{yt.title}.mp4")
+            subprocess.run([
+                "ffmpeg", "-y",
+                "-i", video_path,
+                "-i", audio_path,
+                "-c:v", "copy",
+                "-c:a", "aac",
+                merged_path
+            ], check=True)
+
+            os.remove(video_path)
+            os.remove(audio_path)
+            return send_file(merged_path, as_attachment=True, download_name=f"{yt.title}.mp4")
+        else:
+            if audio == "true":
+                filename = filename.replace('.mp4', '.mp3')
+            stream.download(output_path=DOWNLOAD_FOLDER, filename=filename)
+            return send_file(os.path.join(DOWNLOAD_FOLDER, filename), as_attachment=True, download_name=filename)
+    except Exception as e:
+        return render_template("error.html", error=e)
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0')
