@@ -1,4 +1,4 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -101,57 +101,4 @@
         </script>
 </body>
 
-</html> -->
-
-
-
-
-
-
-
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Playlist Download</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    h1 { color: #333; }
-    .playlist-item { margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; border-radius: 5px; }
-    button { margin: 5px; padding: 8px 12px; cursor: pointer; }
-    .audio-btn { background-color: #4CAF50; color: white; border: none; }
-    .video-btn { background-color: #2196F3; color: white; border: none; }
-  </style>
-</head>
-<body>
-  <h1>Playlist Download</h1>
-  <p>Total Audio Size: {{ totalaudiosize }}</p>
-
-  {% for idx, video in enumerate(object) %}
-    <div class="playlist-item">
-      <h3>{{ video.title }}</h3>
-      <p>Available Resolutions:</p>
-      {% for res in res[idx] %}
-        <button class="video-btn" onclick="downloadVideo('{{ dictonary[idx][res][0] }}', false)">
-          {{ res }} - {{ dictonary[idx][res][1] }}
-        </button>
-      {% endfor %}
-      <button class="audio-btn" onclick="downloadVideo('{{ audioSize[idx][0] }}', true)">
-        Audio - {{ audioSize[idx][1] }}
-      </button>
-    </div>
-  {% endfor %}
-
-  <script>
-    function downloadVideo(format_id, isAudio) {
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = `/download/${format_id}/${isAudio}`;
-      document.body.appendChild(form);
-      form.submit();
-    }
-  </script>
-</body>
 </html>
